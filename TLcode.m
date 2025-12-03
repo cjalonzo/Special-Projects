@@ -14,11 +14,22 @@ L_per_m = 250e-9;     % series inductance (H/m)
 G_per_m = 1e-3;       % shunt conductance (S/m)
 C_per_m = 100e-12;    % shunt capacitance (F/m)
 
+
 % section (lumped) values
 R = R_per_m * dx;     % series resistance per section
 L = L_per_m * dx;     % series inductance per section
 G = G_per_m * dx;     % shunt conductance per section
 C = C_per_m * dx;     % shunt capacitance per section
+
+% --- Skin effect modeling coefficient (adjust as needed) ---
+% R_skin scales how strongly resistance increases at high freq.
+R_skin_coeff = 0.7;      % empirical factor (0.3–1.5 typical)
+f_equiv = 1/(4*dt);      % approximate effective freq content
+R_skin = R_skin_coeff * sqrt(f_equiv);
+
+% Effective series resistance including skin effect
+R_eff = R + R_skin;
+
 
 % ---- simulation parameters ----
 fs = 5e9;             % sampling frequency (Hz) - choose high enough
@@ -57,14 +68,14 @@ for n = 1:steps
     for k = 1:N
         v_left = (k==1) * v_source + (k>1) * v(k-1);
         v_right = v(k);
-        di = (dt / L) * (v_left - v_right - R * i(k+1)); 
+        di = (dt / L) * (v_left - v_right - R_eff * i(k+1)); 
         % note: i array offset chosen so i(k+1) corresponds to series current between node k and k+1
         i(k+1) = i(k+1) + di;
     end
     
     % update leftmost current from source to node1 (i(1) between source and node1)
     % using: di_source = (dt/L) * (Vsource - v(1) - R * i(1))
-    di_s = (dt / L) * (pulse(t) - v(1) - R * i(1) - Rs * i(1));
+    di_s = (dt / L) * (pulse(t) - v(1) - R_eff * i(1) - Rs * i(1));
     i(1) = i(1) + di_s;
     
     % update capacitor voltages: v_k^{n+1} = v_k^{n} + (dt/C)*(i_k - i_{k+1} - G*v_k)
