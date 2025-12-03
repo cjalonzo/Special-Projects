@@ -1,5 +1,5 @@
 % Transmission-line ladder time-domain simulator (lumped N-section)
-% Save as txline_sim.m and run in MATLAB.
+
 
 clear; close all; clc;
 
