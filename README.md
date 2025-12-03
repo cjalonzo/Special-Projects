@@ -1,4 +1,4 @@
-# Transmission Line Simulator (MATLAB)
+# (MATLAB) Transmission Line Simulator
 
 This project implements a time- and frequency-domain transmission line simulator using MATLAB.  
 The simulator models distributed transmission line parameters (R, L, G, C) using an N-section lumped LC/RG ladder and computes wave propagation, 
